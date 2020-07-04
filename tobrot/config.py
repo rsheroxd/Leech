@@ -9,4 +9,4 @@ class Config(Config):
   # please read https://t.me/c/1279877202/74
   # if you have not read the above README
   AUTH_CHANNEL = [-1001107877043, -1001246022921]
-  DOWNLOAD_LOCATION = "home/ubuntu/Leech/senpaidls
+  DOWNLOAD_LOCATION = "home/ubuntu/Leech/senpaidls"
