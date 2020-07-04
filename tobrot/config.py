@@ -1,7 +1,7 @@
 from tobrot.sample_config import Config
 
 class Config(Config):
-  TG_BOT_TOKEN = "1143081337:AAEYkVmfOeh0QP1Owpwb4-arQ2nCbovPP8E"
+  TG_BOT_TOKEN = "1102198336:AAHLjjwKA8vdnRUz2k-dZlLsvK04EME5hws"
   # These example values won't work. You must get your own app_id and
   # api_hash from https://my.telegram.org, under API Development.
   APP_ID = 928403
