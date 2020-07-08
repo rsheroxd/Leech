@@ -8,5 +8,4 @@ class Config(Config):
   API_HASH = "4a546388b91f6f815c4a6adbbc30d574"
   # please read https://t.me/c/1279877202/74
   # if you have not read the above README
-  AUTH_CHANNEL = [-1001107877043, -1001246022921]
-  DOWNLOAD_LOCATION = "home/ubuntu/Leech/senpaidls"
+  AUTH_CHANNEL = [-1001107877043]
