@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 import asyncio
 import os
 import time
+import shutil
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
 from PIL import Image
@@ -43,7 +44,9 @@ async def upload_to_tg(
     edit_media=False
 ):
     LOGGER.info(local_file_name)
-    local = "../" + local_file_name
+    moves = "../" + local_file_name
+    new = os.getcwd()
+    shutil.move(moves, new)
     base_file_name = os.path.basename(local)
     caption_str = ""
     caption_str += "<code>"
