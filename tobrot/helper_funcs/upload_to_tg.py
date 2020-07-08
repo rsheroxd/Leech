@@ -43,7 +43,8 @@ async def upload_to_tg(
     edit_media=False
 ):
     LOGGER.info(local_file_name)
-    base_file_name = os.path.basename(local_file_name)
+    local = "../" + local_file_name
+    base_file_name = os.path.basename(local)
     caption_str = ""
     caption_str += "<code>"
     caption_str += base_file_name
@@ -54,8 +55,8 @@ async def upload_to_tg(
     # caption_str += "'>"
     # caption_str += "Here is the file to the link you sent"
     # caption_str += "</a>"
-    if os.path.isdir(local_file_name):
-        directory_contents = os.listdir(local_file_name)
+    if os.path.isdir(local):
+        directory_contents = os.listdir(local)
         directory_contents.sort()
         # number_of_files = len(directory_contents)
         LOGGER.info(directory_contents)
@@ -70,26 +71,26 @@ async def upload_to_tg(
             # recursion: will this FAIL somewhere?
             await upload_to_tg(
                 new_m_esg,
-                os.path.join(local_file_name, single_file),
+                os.path.join(local, single_file),
                 from_user,
                 dict_contatining_uploaded_files,
                 edit_media
             )
     else:
-        if os.path.getsize(local_file_name) > TG_MAX_FILE_SIZE:
+        if os.path.getsize(local) > TG_MAX_FILE_SIZE:
             LOGGER.info("TODO")
-            d_f_s = humanbytes(os.path.getsize(local_file_name))
+            d_f_s = humanbytes(os.path.getsize(local))
             i_m_s_g = await message.reply_text(
                 "Telegram does not support uploading this file.\n"
                 f"Detected File Size: {d_f_s} 😡\n"
                 "\n🤖 trying to split the files 🌝🌝🌚"
             )
-            splitted_dir = await split_large_files(local_file_name)
+            splitted_dir = await split_large_files(local)
             totlaa_sleif = os.listdir(splitted_dir)
             totlaa_sleif.sort()
             number_of_files = len(totlaa_sleif)
             LOGGER.info(totlaa_sleif)
-            ba_se_file_name = os.path.basename(local_file_name)
+            ba_se_file_name = os.path.basename(local)
             await i_m_s_g.edit_text(
                 f"Detected File Size: {d_f_s} 😡\n"
                 f"<code>{ba_se_file_name}</code> splitted into {number_of_files} files.\n"
@@ -106,18 +107,18 @@ async def upload_to_tg(
         else:
             sent_message = await upload_single_file(
                 message,
-                local_file_name,
+                local,
                 caption_str,
                 from_user,
                 edit_media
             )
             if sent_message is not None:
-                dict_contatining_uploaded_files[os.path.basename(local_file_name)] = sent_message.message_id
+                dict_contatining_uploaded_files[os.path.basename(local)] = sent_message.message_id
     # await message.delete()
     return dict_contatining_uploaded_files
 
 
-async def upload_single_file(message, local_file_name, caption_str, from_user, edit_media):
+async def upload_single_file(message, local, caption_str, from_user, edit_media):
     await asyncio.sleep(EDIT_SLEEP_TIME_OUT)
     sent_message = None
     start_time = time.time()
@@ -133,10 +134,10 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
         message_for_progress_display = message
         if not edit_media:
             message_for_progress_display = await message.reply_text(
-                "starting upload of {}".format(os.path.basename(local_file_name))
+                "starting upload of {}".format(os.path.basename(local))
             )
-        if local_file_name.upper().endswith(("MKV", "MP4", "WEBM")):
-            metadata = extractMetadata(createParser(local_file_name))
+        if local.upper().endswith(("MKV", "MP4", "WEBM")):
+            metadata = extractMetadata(createParser(local))
             duration = 0
             if metadata.has("duration"):
                 duration = metadata.get('duration').seconds
@@ -147,12 +148,12 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
             if os.path.exists(thumbnail_location):
                 thumb_image_path = await copy_file(
                     thumbnail_location,
-                    os.path.dirname(os.path.abspath(local_file_name))
+                    os.path.dirname(os.path.abspath(local))
                 )
             else:
                 thumb_image_path = await take_screen_shot(
-                    local_file_name,
-                    os.path.dirname(os.path.abspath(local_file_name)),
+                    local,
+                    os.path.dirname(os.path.abspath(local)),
                     (duration / 2)
                 )
                 # get the correct width, height, and duration for videos greater than 10MB
@@ -181,7 +182,7 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
             if edit_media and message.photo:
                 sent_message = await message.edit_media(
                     media=InputMediaVideo(
-                        media=local_file_name,
+                        media=local,
                         thumb=thumb,
                         caption=caption_str,
                         parse_mode="html",
@@ -194,7 +195,7 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
                 )
             else:
                 sent_message = await message.reply_video(
-                    video=local_file_name,
+                    video=local,
                     # quote=True,
                     caption=caption_str,
                     parse_mode="html",
@@ -214,8 +215,8 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
                 )
             if thumb is not None:
                 os.remove(thumb)
-        elif local_file_name.upper().endswith(("MP3", "M4A", "M4B", "FLAC", "WAV")):
-            metadata = extractMetadata(createParser(local_file_name))
+        elif local.upper().endswith(("MP3", "M4A", "M4B", "FLAC", "WAV")):
+            metadata = extractMetadata(createParser(local))
             duration = 0
             title = ""
             artist = ""
@@ -229,7 +230,7 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
             if os.path.isfile(thumbnail_location):
                 thumb_image_path = await copy_file(
                     thumbnail_location,
-                    os.path.dirname(os.path.abspath(local_file_name))
+                    os.path.dirname(os.path.abspath(local))
                 )
             thumb = None
             if thumb_image_path is not None and os.path.isfile(thumb_image_path):
@@ -238,7 +239,7 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
             if edit_media and message.photo:
                 sent_message = await message.edit_media(
                     media=InputMediaAudio(
-                        media=local_file_name,
+                        media=local,
                         thumb=thumb,
                         caption=caption_str,
                         parse_mode="html",
@@ -250,7 +251,7 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
                 )
             else:
                 sent_message = await message.reply_audio(
-                    audio=local_file_name,
+                    audio=local,
                     # quote=True,
                     caption=caption_str,
                     parse_mode="html",
@@ -274,7 +275,7 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
             if os.path.isfile(thumbnail_location):
                 thumb_image_path = await copy_file(
                     thumbnail_location,
-                    os.path.dirname(os.path.abspath(local_file_name))
+                    os.path.dirname(os.path.abspath(local))
                 )
             # if a file, don't upload "thumb"
             # this "diff" is a major derp -_- 😔😭😭
@@ -286,7 +287,7 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
             if edit_media and message.photo:
                 sent_message = await message.edit_media(
                     media=InputMediaDocument(
-                        media=local_file_name,
+                        media=local,
                         thumb=thumb,
                         caption=caption_str,
                         parse_mode="html"
@@ -295,7 +296,7 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
                 )
             else:
                 sent_message = await message.reply_document(
-                    document=local_file_name,
+                    document=local,
                     # quote=True,
                     thumb=thumb,
                     caption=caption_str,
@@ -316,5 +317,5 @@ async def upload_single_file(message, local_file_name, caption_str, from_user, e
     else:
         if message.message_id != message_for_progress_display.message_id:
             await message_for_progress_display.delete()
-    os.remove(local_file_name)
+    os.remove(local)
     return sent_message
